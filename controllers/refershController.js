@@ -59,7 +59,18 @@ const handleRefreshToken = async (req, res) => {
 
       res.cookie('token', newRefreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 2592000 })
       
-      res.json({ accessToken });
+      const responseUser = {
+        id: foundUser?._id,
+        email: foundUser?.email,
+        firstName: foundUser?.firstName,
+        lastName: foundUser?.lastName,
+        role: foundUser?.role
+      }
+      
+      res.status(200).json({ 
+        user:responseUser, 
+        accessToken: accessToken 
+      });
     }
   )
 }

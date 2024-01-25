@@ -5,14 +5,13 @@ import { generateAccessToken, generateRefreshToken } from '../utils/generateToke
 import { handleErrors } from '../utils/handleErrors.js';
 import { verfiyGoogleToken } from '../middleware/verifyGoogleToken.js';
 
-const maxAge =  24 * 60 * 60 * 1000; // 1 day
-
-
 const googleLogin = async(req, res) => {
 
   let user = '';
 
-  const { email, password, credential } = req.body;
+  const cookies = req.cookies;
+
+  const { credential } = req.body;
 
   try {
 
@@ -25,8 +24,13 @@ const googleLogin = async(req, res) => {
         }
 
         const profile = verficationResponse?.payload;
+
+        const email = profile?.email; let newRefreshTokenArray = [];
         
-        const existsInDB = await User.findUser( profile?.email );
+        const existsInDB = await User.findOne({email}).exec();
+
+        const accessToken = generateAccessToken( email );
+        const newRefreshToken = generateRefreshToken( email );
 
         if (!existsInDB) {
           const userInfo =  { 
@@ -36,70 +40,65 @@ const googleLogin = async(req, res) => {
             password: '', 
             role: 'user',
             loginType : "social",
+            refreshToken: [newRefreshToken]
           }
-          // console.log(userInfo);
-
           user = await User.create(userInfo);
-
         } else {
+
           user = {
             id: existsInDB._id,
             email: profile?.email,
             firstName : profile?.given_name, 
             lastName: profile?.family_name,
           }
+
+          newRefreshTokenArray = !cookies.token ? existsInDB?.refreshToken : existsInDB.refreshToken.filter(rt => rt !== cookies.token)
+          
+          if(cookies?.token) {
+            const refreshToken = cookies.token;
+            const foundToken = await User.findOne({refreshToken}).exec();
+
+            if(!foundToken) {
+              newRefreshTokenArray = []
+            }
+
+            res.clearCookie('token' , { httpOnly: true, sameSite: 'None', secure: true })
+          }
+        
+          existsInDB.refreshToken = [...newRefreshTokenArray, newRefreshToken]
+          const result = existsInDB.save();
+
         }
         
-        const accessToken = generateAccessToken( user.email );
-        const refreshToken = generateRefreshToken( user.email );
-
-        // refreshTokens.push(accessToken);
-        res.cookie('token', refreshToken, { httpOnly: true, maxAge: maxAge * 1000 });
+        res.cookie('token', newRefreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 2592000 });
         
-
-        res.status(200).json({ 
+        const responseUser = {
           id: user.id,
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
           role: "user", 
-          accessToken: accessToken,
-          refreshToken: refreshToken
+        }
+
+        res.status(200).json({ 
+          user: responseUser,
+          accessToken: accessToken
         });
 
-    } else {
-      // normal login
-
-      const user = await User.login( email, password );
-
-      const accessToken = generateAccessToken( user.email );
-      const refreshToken = generateRefreshToken( user.email );
-      
-      // refreshTokens.push(accessToken);
-      res.cookie('token', refreshToken, { httpOnly: true, maxAge: maxAge * 1000 });
-      res.status(200).json({ 
-        id: user._id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role, 
-        accessToken: accessToken,
-        refreshToken: refreshToken
-      });
     }
-
-  
-  } catch (err) { 
+  } catch (err) {
     const errors = handleErrors(err)
-    res.status(400).json({ errors: errors });
+    res.status(500).json({ errors: errors });
   }
 }
 
 const gitLogin = async (req,res) => {
   let user = '';
+  const cookies = req.cookies;
   const { code } = req.body
   const client_id = process.env.GITHUB_CLIENT_ID;
   const client_secret = process.env.GITHUB_SECRECT;
+  let newRefreshTokenArray = [];
 
   const params = `?client_id=${client_id}&client_secret=${client_secret}&code=${code}`;
 
@@ -111,9 +110,6 @@ const gitLogin = async (req,res) => {
   }).then((response) => {
     return response.json()
   }).then( (data) => {
-    
-      //res.json(data);
-
       return fetch(`https://api.github.com/user`, {
         method: "GET",
         headers: {
@@ -123,47 +119,70 @@ const gitLogin = async (req,res) => {
       .then( async (response) => {
 
         const existsInDB = await User.findUser( response?.email );
+
+        const accessToken = generateAccessToken( response?.email );
+        const newRefreshToken = generateRefreshToken( response?.email );
         
         // check existing user or not
         if (!existsInDB) {
+
           const userInfo =  {
             firstName : response?.name,
             email: response?.email,
             role: 'user',
-            loginType: 'social'
+            loginType: 'social',
+            refreshToken: [newRefreshToken]
           }
+
           user = await User.create(userInfo);
 
         } else {
+          
           user = {
-            email: response?.email,
-            firstName : response?.name,
+            id: existsInDB?._id,
+            email: existsInDB?.email,
+            firstName : existsInDB?.firstName,
             role: 'user',
             loginType : "social",
           }
+
+          newRefreshTokenArray = !cookies.token ? existsInDB?.refreshToken : existsInDB.refreshToken.filter(rt => rt !== cookies.token)
+          
+          if(cookies?.token) {
+            const refreshToken = cookies.token;
+            const foundToken = await User.findOne({refreshToken}).exec();
+
+            if(!foundToken) {
+              newRefreshTokenArray = []
+            }
+
+            res.clearCookie('token' , { httpOnly: true, sameSite: 'None', secure: true })
+          }
+        
+          existsInDB.refreshToken = [...newRefreshTokenArray, newRefreshToken]
+          const result = existsInDB.save();
         }
 
-        const accessToken = generateAccessToken( response.email );
-        const refreshToken = generateRefreshToken( response.email );
+        res.cookie('token', newRefreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 2592000 });
 
-        res.cookie('token', refreshToken, { httpOnly: true, maxAge: maxAge * 1000 });
-
-        res.status(200).json({
-          id: user._id,
+        const responseUser = {
+          id: user.id,
           email: user.email,
-          firstName : response?.name,
-          role: 'user', 
-          accessToken: accessToken,
-          refreshToken: refreshToken
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: "user", 
+        }
+
+        res.status(200).json({ 
+          user: responseUser,
+          accessToken: accessToken
         });
 
-        // return res.status(200).json(response)
       }).catch((err) => {
           return res.status(500).json(err);
       })
   })
 }
-
 
 export {
   googleLogin,

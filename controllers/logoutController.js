@@ -5,7 +5,6 @@ const handleLogout = async (req, res) => {
   if(!cookies?.token) return res.sendStatus(204)
 
   const refreshToken = cookies.token;
-  console.log(refreshToken);
 
   const foundUser = await User.findOne({ refreshToken }).exec();
   if(!foundUser) {
