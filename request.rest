@@ -1,0 +1,211 @@
+GET http://localhost:5050/
+
+###
+POST http://localhost:5050/auth
+Content-Type: application/json
+
+{
+  "email": "admin@gmail.com",
+  "password": "test335"
+}
+
+###
+GET http://localhost:5050/refresh
+Content-Type: application/json
+
+###
+GET http://localhost:5050/api/v1/users/
+
+###
+POST http://localhost:5050/login
+Content-Type: application/json
+
+{
+  "email": "admin@gmail.com",
+  "password": "test335",
+  "role": "admin",
+  "loginType": "email"
+}
+
+###
+POST http://localhost:5050/refreshtoken
+Content-Type: application/json
+
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTY5NzA4MzY2MCwiZXhwIjoxNjk3MDg3MjYwfQ.Vtrh1ju8_LH7ojYUtnCIZW034XoxV6UqYE4L4F1QhtE"
+}
+
+###
+POST http://localhost:5050/register
+Content-Type: application/json
+
+{
+  "firstName": "Hello2",
+  "lastName": "World",
+  "email": "hello@gmail.com",
+  "password": "test335",
+  "role": "user"
+}
+
+### User Sign
+POST http://localhost:5050/register
+Content-Type: application/json
+
+{
+  "firstName": "ohn",
+  "lastName": "mar",
+  "email": "user1@gmail.com",
+  "password": "test335"
+}
+
+###
+POST http://localhost:5050/gitLogin
+Content-Type: application/json
+
+{
+  "firstName": "ohn",
+  "lastName": "mar",
+  "email": "zen@gmail.com",
+  "password": "",
+  "loginType": ""
+}
+
+###
+GET http://localhost:5050/api/v1/user/
+Content-Type: application/json
+
+###
+GET http://localhost:5050/api/v1/user/count
+Content-Type: application/json
+
+###
+GET http://localhost:5050/api/v1/quiz/
+Content-Type: application/json
+
+{
+  "category": "Javascript"
+}
+
+###
+GET http://localhost:5050/api/v1/64fe8b354d9e59418c9258be
+Content-Type: application/json
+
+###
+GET http://localhost:5050/api/v1/quiz/count
+Content-Type: application/json
+
+###
+GET http://localhost:5050/api/v1/quiz/groupby
+Content-Type: application/json
+
+###
+POST http://localhost:5050/api/v1/quiz
+Content-Type: application/json
+
+{
+  "category": "65017f1f25b9202e7a5b3ab5",
+  "level": "Beginner",
+  "question": "Which is the most beautiful Capital City?",
+  "answers": ["Paris", "London", "Berlin", "Madrid"],
+  "correct_answer": "Paris"
+}
+
+###
+POST http://localhost:5050/api/v1/quiz
+Content-Type: application/json
+
+{
+  "category": "65017f1f25b9202e7a5b3ab5",
+  "level": "Beginner",
+  "question": "What is the largest country in the world3?",
+  "answers": ["Russia", "Canada", "China", "USA"],
+  "correct_answer": "Russia"
+}
+
+###
+POST http://localhost:5050/api/v1/quiz/filterby
+Content-Type: application/json
+
+{
+  "category": "65017f1f25b9202e7a5b3ab5",
+  "level": "Beginner"
+}
+
+###
+POST http://localhost:5050/api/v1/quiz
+Content-Type: application/json
+
+{
+  "category": "Web Developer",
+  "level": "Beginner",
+  "question": "What is the currency of England?",
+  "answers": ["Yen", "Doallar", "Euro", "Pound"],
+  "correct_answer": "Yen"
+}
+
+###
+PATCH http://localhost:5050/api/v1/quiz/64fed1dd176401fde21c5f93
+Content-Type: application/json
+
+{
+  "category": "65017f1f25b9202e7a5b3ab5",
+  "level": "Beginner",
+  "question": "What is the currency of United States?",
+  "answers": ["Yen", "Doallar", "Euro", "Pound"],
+  "correct_answer": "Dollar"
+}
+
+###
+DELETE http://localhost:5050/api/v1/quiz/64fed1dd176401fde21c5f93
+Content-Type: application/json
+
+###
+GET http://localhost:5050/api/v1/category/
+
+###
+POST http://localhost:5050/api/v1/category/
+Content-Type: application/json
+
+{
+  "category": "PHP"
+}
+
+###
+PATCH http://localhost:5050/api/v1/category/6503e40d607d904bb0320944
+Content-Type: application/json
+
+{
+  "category": "CSS"
+}
+
+###
+DELETE http://localhost:5050/api/v1/category/6503cc10e6caeb25f37613dd
+Content-Type: application/json
+
+
+### Answer
+POST http://localhost:5050/api/v1/answers/
+Content-Type: application/json
+
+{
+  "user": "64ef024af7fa5e76e6be447a",
+  "category": "65017f1f25b9202e7a5b3ab5",
+  "score": 15
+}
+
+###
+GET http://localhost:5050/api/v1/answers/latest/
+Content-Type: application/json
+
+###
+GET http://localhost:5050/api/v1/answers/latest/2
+Content-Type: application/json
+
+
+###
+GET http://localhost:5050/api/v1/dashboard
+Content-Type: application/json
+
+
+### Client server
+GET http://localhost:3000/admin/
