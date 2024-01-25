@@ -6,9 +6,9 @@ The project will be organized into modular components, each responsible for spec
 - User Module: Facilitates user management operations.
 
 ## Technology Stack:
--[x] Backend Framework: Node.js
--[x] Database: MongoDB
--[x] Authentication: JSON Web Tokens (JWT), Cookies
+- Backend Framework: Node.js/Express.js
+- Database: MongoDB
+- Authentication: JSON Web Tokens (JWT), Cookies
 
 ## Key Features:
 
